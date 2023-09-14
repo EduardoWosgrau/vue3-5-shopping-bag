@@ -1,5 +1,5 @@
-import { createStore } from 'vuex'
-import axios from 'axios';
+import { createStore } from "vuex";
+import axios from "axios";
 
 export default createStore({
   state: {
@@ -7,32 +7,42 @@ export default createStore({
     productsInBag: [],
   },
   mutations: {
-    loadProducts(state, products){
+    loadProducts(state, products) {
       state.products = products;
     },
-    addToBag(state, product){
+    loadBag(state, productsInBag) {
+      state.productsInBag = productsInBag;
+    },
+    addToBag(state, product) {
       state.productsInBag.push(product);
-    }, 
-    removeFromBag(state, productId){
-      var updatedBag = state.productsInBag.filter(item => item.id != productId);
+      localStorage.setItem('productsInBag', JSON.stringify(state.productsInBag));
+    },
+    removeFromBag(state, productId) {
+      var updatedBag = state.productsInBag.filter(
+        (item) => item.id != productId
+      );
       state.productsInBag = updatedBag;
-    }, 
+      localStorage.setItem('productsInBag', JSON.stringify(state.productsInBag));
+    },
   },
   actions: {
-    loadProducts({ commit }){
-      axios.get('https://fakestoreapi.com/products')
-      .then(response => {
-        commit('loadProducts', response.data);
-      })
+    loadProducts({ commit }) {
+      axios.get("https://fakestoreapi.com/products").then((response) => {
+        commit("loadProducts", response.data);
+      });
     },
-    addToBag({ commit }, product ){
-      commit('addToBag', product)
+    loadBag({ commit }) {
+      if (localStorage.getItem("productsInBag")) {
+        commit("loadBag", JSON.parse(localStorage.getItem("productsInBag")));
+      }
     },
-    removeFromBag({ commit }, productId ){
-      commit('removeFromBag', productId)
-    }
+    addToBag({ commit }, product) {
+      commit("addToBag", product);
+    },
+    removeFromBag({ commit }, productId) {
+      if (confirm("Are you sure you want to remove the item from bag?"))
+        commit("removeFromBag", productId);
+    },
   },
-  modules: {
-
-  }
-})
+  modules: {},
+});
